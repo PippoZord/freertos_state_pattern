@@ -8,6 +8,11 @@
 void StateIdle_Run(State *self, Context *context) {
     printf("RunIdle\n");
     Agent *agent = GetAgentByName("agent1");
+    if (agent == NULL) {
+        printf("Non c'è Agent\n");
+        SetState(context, STATE_LOOP);
+        return;
+    }
     printf("%s %d\n", agent->name, agent->timeout);
     SetState(context, STATE_LOOP);
 }
@@ -20,6 +25,10 @@ void StateLoop_Run(State *self, Context *context) {
 
 void StateError_Run(State *self, Context *context) {
     printf("RunError\n");
+    Agent *agent = GetAgentByName("agent1");
+    if (agent != NULL) {
+        DeleteAgent(agent);
+    }
     SetState(context, STATE_IDLE);
 }
 

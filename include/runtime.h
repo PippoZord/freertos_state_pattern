@@ -13,10 +13,12 @@
 #define RUNTIME_H
 
     /**
-     * @brief Binds a running Agent to the FreeRTOS task that executes it,
-     * so the runtime can look it up and stop it later (vTaskDelete on
-     * handle). A slot with handle == 0 and agent == NULL is considered
-     * free and can be reused by addtask().
+     * @brief Binds a running Agent to the FreeRTOS task that executes it
+     * (if any - an Agent created with timeout == 0 has no task, so its
+     * handle is NULL even though it is very much registered), so the
+     * runtime can look it up and stop it later (vTaskDelete on handle).
+     * A slot is free (reusable by addTask()) exactly when agent == NULL;
+     * handle == 0 alone does NOT mean the slot is free.
      */
     typedef struct {
         TaskHandle_t handle;

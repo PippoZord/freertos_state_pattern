@@ -31,8 +31,8 @@ static void checkParameters(Agent *agent, char *name, int timeout, uint32_t uxSt
         panic("ERROR: agent cannot be NULL");
     else if (strlen(name) == 0)
         panic("ERROR: name must be at least one char");
-    else if (timeout <1)
-        panic("ERROR: timeout should be greater than 0");
+    else if (timeout <0)
+        panic("ERROR: timeout should be greater than -1");
     else if (uxStackDepth<1)
         panic("ERROR: uxStackDepth should be greater than 0");
     else if (uxPriority > configMAX_PRIORITIES-1)

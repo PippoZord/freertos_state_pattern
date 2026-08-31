@@ -115,7 +115,7 @@ static void addTask(AgentTask *agentTask) {
     Runtime *rt = GetIstance();
 
     for (int i =0; i<rt->tasks->len; i++){
-        if (rt->tasks->tasks[i].handle == 0) {
+        if (rt->tasks->tasks[i].agent == NULL) {
             rt->tasks->tasks[i].agent = agentTask->agent;
             rt->tasks->tasks[i].handle = agentTask->handle;
             return;
@@ -172,15 +172,17 @@ void PrintRuntimeState() {
 /** @copydoc StartAgent */
 void StartAgent(Agent *agent) {
     if (agent == NULL) panic("ERROR: agent cannot be NULL");
-
-    TaskHandle_t handle;
-    BaseType_t created = xTaskCreate(Run, agent->name, agent->uxStackDepth, agent, agent->uxPriority, &handle);
-    if (created != pdPASS) panic("ERROR: xTaskCreate failed for agent '%s'", agent->name);
-
-    AgentTask task = { .handle = handle, .agent = agent };
+    AgentTask task = { .handle = NULL, .agent = agent };
+    if (agent->timeout > 0) {
+        TaskHandle_t handle;
+        BaseType_t created = xTaskCreate(Run, agent->name, agent->uxStackDepth, agent, agent->uxPriority, &handle);
+        if (created != pdPASS) panic("ERROR: xTaskCreate failed for agent '%s'", agent->name);
+        task.handle = handle;
+    } 
     addTask(&task);
     printf("[RUNTIME] StartAgent('%s')\n", agent->name);
     PrintRuntimeState();
+
 }
 
 /** @copydoc DeleteAgent */
@@ -190,7 +192,12 @@ void DeleteAgent(Agent *agent) {
     AgentTask *ag = getTaskByName(agent->name);
     if (ag == NULL) return;
     printf("[RUNTIME] DeleteAgent('%s')\n", agent->name); // prima di liberare name!
-    vTaskDelete(ag->handle);
+    if (ag->handle != NULL) {
+        // A timeout == 0 Agent never got a FreeRTOS task (see StartAgent);
+        // vTaskDelete(NULL) deletes the CALLING task, not "nothing", so
+        // it must never be called for one of these.
+        vTaskDelete(ag->handle);
+    }
     removeTask(agent->name); // libera agent->name e agent stesso
     PrintRuntimeState();
 }
