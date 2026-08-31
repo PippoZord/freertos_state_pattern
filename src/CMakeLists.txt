@@ -2,6 +2,9 @@ add_executable(${NAME}
         main.c
         context.c
         state.c
+        runtime.c
+        agent.c
+        peripheral.c
         )
 
 # Header search path for our own .h files (project_root/include)
