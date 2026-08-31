@@ -57,7 +57,8 @@ AgentTask *getTaskByHandle(TaskHandle_t handle) {
 /**
  * @brief Internal helper: find the AgentTask entry whose agent has the
  * given name. Used by DeleteAgent() to resolve an Agent* to its task
- * handle before deleting the FreeRTOS task.
+ * handle before deleting the FreeRTOS task, and by GetAgentByName() to
+ * hand callers the Agent* alone.
  *
  * @param name Agent name to search for; cannot be NULL, panics otherwise.
  * @return AgentTask* Matching entry, or NULL if no running agent has that name.
@@ -73,6 +74,12 @@ static AgentTask *getTaskByName(char *name) {
         };
     }
     return NULL;
+}
+
+/** @copydoc GetAgentByName */
+Agent *GetAgentByName(char *name) {
+    AgentTask *task = getTaskByName(name);
+    return task == NULL ? NULL : task->agent;
 }
 
 /**

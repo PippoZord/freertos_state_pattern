@@ -2,12 +2,13 @@
 #include "state.h"
 #include <stdio.h>
 #include "pico/time.h"
-#include "peripheral.h"
+#include "runtime.h"
+#include "agent.h"
 
 void StateIdle_Run(State *self, Context *context) {
     printf("RunIdle\n");
-    Peripheral *peripheral = GetPeripheral();
-    printf("%s %d\n", peripheral->agent->name, peripheral->agent->timeout);
+    Agent *agent = GetAgentByName("agent1");
+    printf("%s %d\n", agent->name, agent->timeout);
     SetState(context, STATE_LOOP);
 }
 

@@ -72,6 +72,16 @@
     AgentTask *getTaskByHandle(TaskHandle_t handle);
 
     /**
+     * @brief Look up a running Agent by name. Callers only ever get the
+     * Agent* back, not the AgentTask/task handle wrapping it - the
+     * FreeRTOS-side bookkeeping stays internal to the runtime.
+     *
+     * @param name Agent name to search for; cannot be NULL, panics otherwise.
+     * @return Agent* Matching agent, or NULL if none is currently running with that name.
+     */
+    Agent *GetAgentByName(char *name);
+
+    /**
      * @brief Stop an Agent: deletes its FreeRTOS task (vTaskDelete) and
      * frees the Agent itself (name buffer + struct), releasing its slot
      * in the task table for reuse. No-op if no running agent matches
