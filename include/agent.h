@@ -15,6 +15,10 @@ typedef struct Agent Agent;
  */
 typedef void (*AgentBehaviour)(Agent *self);
 
+
+typedef void (*AgentDelete)(Agent *self);
+
+
 /**
  * @brief Object Agent wants all parameters to be accepted from FreeRTOS Kernel
  * 
@@ -25,6 +29,7 @@ struct Agent {
     uint32_t uxStackDepth;
     UBaseType_t uxPriority;
     AgentBehaviour behave;
+    AgentDelete agentDelete;
 };
 /**
  * @brief Initialize an already-allocated Agent in place. Validates the
@@ -46,8 +51,9 @@ struct Agent {
  * @param uxStackDepth Task stack depth, in words (as in xTaskCreate).
  * @param uxPriority FreeRTOS task priority (0 .. configMAX_PRIORITIES-1).
  * @param behave Behaviour function called on every Run() cycle.
+ * @param delete Delete function called from runtime to reset value of the agent
  */
-void Agent_Init(Agent *agent, char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, AgentBehaviour behave);
+void Agent_Init(Agent *agent, char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, AgentBehaviour behave, AgentDelete delete);
 
 /**
  * @brief Allocate a new "base" Agent (default, no-op behaviour), initialize

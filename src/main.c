@@ -9,6 +9,6 @@ int main() {
     stdio_init_all();
     Peripheral *peripheral = GetPeripheral();
     Context c = NewContext();
-    xTaskCreate( RunCurrentState, "test_runtime", 512, &c, 1, NULL);
+    xTaskCreate( RunCurrentState, "context runtime", 512, &c, 1, NULL);
     vTaskStartScheduler();
 }

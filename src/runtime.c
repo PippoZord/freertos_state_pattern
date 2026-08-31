@@ -191,13 +191,14 @@ void DeleteAgent(Agent *agent) {
 
     AgentTask *ag = getTaskByName(agent->name);
     if (ag == NULL) return;
-    printf("[RUNTIME] DeleteAgent('%s')\n", agent->name); // prima di liberare name!
+    printf("[RUNTIME] DeleteAgent('%s')\n", agent->name);
     if (ag->handle != NULL) {
-        // A timeout == 0 Agent never got a FreeRTOS task (see StartAgent);
-        // vTaskDelete(NULL) deletes the CALLING task, not "nothing", so
-        // it must never be called for one of these.
         vTaskDelete(ag->handle);
     }
-    removeTask(agent->name); // libera agent->name e agent stesso
+    // Release the agent's hardware (e.g. turn off an LED) while agent is
+    // still valid - removeTask() below frees agent->name and agent itself,
+    // so agentDelete() must run before it, not after.
+    agent->agentDelete(agent);
+    removeTask(agent->name);
     PrintRuntimeState();
 }

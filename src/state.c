@@ -25,7 +25,7 @@ void StateLoop_Run(State *self, Context *context) {
 
 void StateError_Run(State *self, Context *context) {
     printf("RunError\n");
-    Agent *agent = GetAgentByName("agent1");
+    Agent *agent = GetAgentByName("led");
     if (agent != NULL) {
         DeleteAgent(agent);
     }

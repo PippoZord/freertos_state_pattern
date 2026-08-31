@@ -26,7 +26,7 @@
  * @param uxPriority FreeRTOS priority, must be in [0, configMAX_PRIORITIES-1].
  * @param behave Behaviour function, cannot be NULL.
  */
-static void checkParameters(Agent *agent, char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, AgentBehaviour behave){
+static void checkParameters(Agent *agent, char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, AgentBehaviour behave, AgentDelete delete){
     if (agent == NULL)
         panic("ERROR: agent cannot be NULL");
     else if (strlen(name) == 0)
@@ -39,10 +39,12 @@ static void checkParameters(Agent *agent, char *name, int timeout, uint32_t uxSt
         panic("ERROR: priority must be between 0 and configMAX_PRIORITIES - 1");
     else if (behave==NULL)
         panic("ERROR: behave function cannot be NULL");
+    else if (delete==NULL)
+        panic("ERROR: delete function cannot be NULL");
 }
 
-void Agent_Init(Agent *agent, char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, AgentBehaviour behave) {
-    checkParameters(agent, name, timeout,  uxStackDepth,  uxPriority,  behave);
+void Agent_Init(Agent *agent, char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, AgentBehaviour behave, AgentDelete delete) {
+    checkParameters(agent, name, timeout,  uxStackDepth,  uxPriority,  behave, delete);
     agent->name = malloc(strlen(name) + 1);
     if (agent->name == NULL) panic("ERROR: During creation of a new agent: %s", name);
     strcpy(agent->name, name);
@@ -50,6 +52,7 @@ void Agent_Init(Agent *agent, char *name, int timeout, uint32_t uxStackDepth, UB
     agent->uxStackDepth=uxStackDepth;
     agent->uxPriority = uxPriority;
     agent->behave = behave;
+    agent->agentDelete = delete;
     StartAgent(agent);
 }
 
@@ -64,11 +67,24 @@ static void Agent_DefaultBehave(Agent *self) {
     (void)self;
 }
 
+
+/**
+ * @brief Default delete/cleanup for a "base" Agent created via NewAgent():
+ * no hardware to release, so it's a no-op. Derived types (e.g. BlinkLed)
+ * pass their own delete() to Agent_Init() instead, to actually turn off
+ * their hardware (e.g. the LED) before the Agent itself is freed.
+ *
+ * @param self The agent itself (unused).
+ */
+static void Agent_DefaultDelete(Agent *self) {
+    (void)self;
+}
+
 /** @copydoc NewAgent */
 Agent *NewAgent(char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority) {
     Agent *agent = malloc(sizeof(Agent));
     if (agent == NULL) panic("ERROR: During creation of a new agent: %s", name);
-    Agent_Init(agent, name, timeout, uxStackDepth, uxPriority, Agent_DefaultBehave);
+    Agent_Init(agent, name, timeout, uxStackDepth, uxPriority, Agent_DefaultBehave, Agent_DefaultDelete);
     return agent;
 }
 

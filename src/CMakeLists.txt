@@ -5,6 +5,7 @@ add_executable(${NAME}
         runtime.c
         agent.c
         peripheral.c
+        blinkled.c
         )
 
 # Header search path for our own .h files (project_root/include)
