@@ -1,0 +1,57 @@
+#ifndef CONTEXT_H
+#define CONTEXT_H
+
+// Forward declarations of the Context and State types, needed because
+// struct State below refers to Context only by pointer (see state.h).
+typedef struct Context Context;
+typedef struct State State;
+
+// Identifies each concrete state, used by SetState() to pick which one
+// ctx->current_state should point to.
+typedef enum {
+    STATE_IDLE,
+    STATE_LOOP,
+    STATE_ERROR
+} StateId;
+
+// A state: just the function to run while it is the active one.
+struct State {
+    // Behavior for this state; called once per RunCurrentState() iteration.
+    void (*run_state)(State *self, Context *context);
+};
+
+// Owns one State instance per concrete state, plus a pointer to whichever
+// one is currently active.
+struct Context {
+    State idle;
+    State loop;
+    State error;
+    State *current_state;
+};
+
+/**
+ * @brief Creates a Context for the state machine, wired up so each State's
+ * run_state points at its behavior function and current_state starts at idle.
+ *
+ * @return A ready-to-use Context.
+ */
+Context NewContext();
+
+/**
+ * @brief Runs the state currently pointed to by ctx->current_state, forever.
+ *
+ * @param ctx Context whose current state should run.
+ */
+void RunCurrentState(Context *ctx);
+
+/**
+ * @brief Switches the active state.
+ * Assigns to ctx->current_state a pointer to the State inside *ctx
+ * (idle, loop, or error) that corresponds to the given id.
+ *
+ * @param ctx Context to update.
+ * @param id Identifier of the state to switch to.
+ */
+void SetState(Context *ctx, StateId id);
+
+#endif

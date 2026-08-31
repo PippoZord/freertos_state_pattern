@@ -1,6 +1,7 @@
 add_executable(${NAME}
         main.c
-
+        context.c
+        state.c
         )
 
 # Header search path for our own .h files (project_root/include)
