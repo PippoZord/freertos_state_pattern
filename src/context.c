@@ -3,6 +3,8 @@
 #include "context.h"
 #include "state.h"
 #include "pico/time.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 Context NewContext() {
     Context ctx = {
@@ -16,14 +18,15 @@ Context NewContext() {
 }
 
 
-void RunCurrentState(Context *ctx) {
+void RunCurrentState(void *pvParameters) {
+    Context *ctx = (Context *)pvParameters;
     ctx->current_state = &ctx->idle;
     while (1) {
         ctx->current_state->run_state(
             ctx->current_state,
             ctx
         );
-        sleep_ms(3000);
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
     
 }

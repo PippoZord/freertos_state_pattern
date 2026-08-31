@@ -53,10 +53,12 @@ Context NewContext();
 
 /**
  * @brief Runs the state currently pointed to by ctx->current_state, forever.
+ * Signature matches TaskFunction_t so this can be passed directly to
+ * xTaskCreate(); pvParameters must be the Context* to run.
  *
- * @param ctx Context whose current state should run.
+ * @param pvParameters Context whose current state should run, as void*.
  */
-void RunCurrentState(Context *ctx);
+void RunCurrentState(void *pvParameters);
 
 /**
  * @brief Switches the active state.
