@@ -17,6 +17,7 @@ void StateLoop_Run(State *self, Context *context) {
 
 void StateError_Run(State *self, Context *context) {
     printf("RunError\n");
+    SetState(context, STATE_IDLE);
 }
 
 
