@@ -11,11 +11,19 @@ void StateIdle_Run(State *self, Context *context) {
 
 void StateLoop_Run(State *self, Context *context) {
     printf("RunLoop\n");
-    SetState(context, STATE_ERROR);
+    SetState(context, STATE_SUB);
 }
 
 
 void StateError_Run(State *self, Context *context) {
     printf("RunError\n");
+}
+
+
+void SubState_Run(State *self, Context *context) {
+    //downcast to acce to value
+    SubState *s = (SubState *)(self);
+    printf("SubState %d\n", s->value);
+    SetState(context, STATE_ERROR);
 }
 

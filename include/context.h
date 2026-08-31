@@ -5,12 +5,14 @@
 // struct State below refers to Context only by pointer (see state.h).
 typedef struct Context Context;
 typedef struct State State;
+typedef struct SubState SubState;
 
 // Identifies each concrete state, used by SetState() to pick which one
 // ctx->current_state should point to.
 typedef enum {
     STATE_IDLE,
     STATE_LOOP,
+    STATE_SUB,
     STATE_ERROR
 } StateId;
 
@@ -20,11 +22,23 @@ struct State {
     void (*run_state)(State *self, Context *context);
 };
 
+/**
+ * @brief A Substate: a state which extends the State struct.
+ * .value is avaible in SubState variable but not in State
+ * .super is the State object which context can use to preserve type and run current state
+ * 
+ */
+struct SubState {
+    State super;
+    int value;
+};
+
 // Owns one State instance per concrete state, plus a pointer to whichever
 // one is currently active.
 struct Context {
     State idle;
     State loop;
+    SubState sub;
     State error;
     State *current_state;
 };

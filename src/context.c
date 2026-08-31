@@ -8,6 +8,7 @@ Context NewContext() {
     Context ctx = {
         .idle = {.run_state =  StateIdle_Run},
         .loop = {.run_state =  StateLoop_Run},
+        .sub = { .super.run_state = SubState_Run, .value = 10},
         .error = {.run_state =  StateError_Run},
         .current_state = NULL
     };
@@ -16,9 +17,6 @@ Context NewContext() {
 
 
 void RunCurrentState(Context *ctx) {
-    /* Computed here, on the caller's real ctx, not inside NewContext(): a
-     * pointer to a field of a by-value struct taken before it is returned
-     * would still point at the temporary's stack slot after the copy. */
     ctx->current_state = &ctx->idle;
     while (1) {
         ctx->current_state->run_state(
@@ -37,6 +35,9 @@ void SetState(Context *ctx, StateId id) {
             break;
         case STATE_LOOP:
             ctx->current_state = &ctx->loop;
+            break;
+        case STATE_SUB:
+            ctx->current_state = &ctx->sub.super;
             break;
         case STATE_ERROR:
             ctx->current_state = &ctx->error;
