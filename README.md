@@ -35,6 +35,14 @@ stateDiagram-v2
     error --> idle
 ```
 
+**[src/state.c](src/state.c) is placeholder logic**, not a real state
+machine: each `*_Run()` just prints and calls `SetState()` to move to
+the next one, purely to show the pattern's own mechanism (`self`/
+`context`, and how a transition works). It's the starting point for
+building an actual state machine on top of it - `context->peripheral`
+(see below) is already wired up and ready to use once you replace
+these bodies with real logic.
+
 `RunCurrentState()` runs as a FreeRTOS task (`xTaskCreate` in
 [src/main.c](src/main.c)): it starts at `idle` and loops forever, calling
 `current_state->run_state()` and then `vTaskDelay()` between iterations
@@ -80,4 +88,4 @@ appears.
 
 Connect over USB serial (`stdio_init_all()` in `main.c` enables both USB
 and UART stdio) to see each state's `printf` as the machine walks its
-states, one every second.
+states, one every 100ms.
