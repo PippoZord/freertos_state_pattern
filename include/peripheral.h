@@ -3,6 +3,7 @@
     #include "agent.h"
     #include "blinkled.h"
     #include "output.h"
+    #include "input.h"
 
     /**
      * @brief Singleton owning every piece of hardware this board uses,
@@ -18,6 +19,7 @@
         Agent *agent;
         BlinkLed *led;
         Output *out1;
+        Input *in1;
     } Peripheral;
 
     /**

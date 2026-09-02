@@ -7,6 +7,7 @@ add_executable(${NAME}
         peripheral.c
         blinkled.c
         output.c
+        input.c
         )
 
 # Header search path for our own .h files (project_root/include)

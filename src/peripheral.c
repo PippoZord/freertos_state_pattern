@@ -7,8 +7,9 @@
 
 #include "peripheral.h"
 #include <stdlib.h>
+#include <stdbool.h>
 #include "blinkled.h"
-#include "output.h"
+
 
 /** @brief Process-wide Peripheral singleton; NULL until the first GetPeripheral() call. */
 static Peripheral *istance = NULL;
@@ -19,7 +20,8 @@ Peripheral *GetPeripheral() {
         istance = malloc(sizeof(Peripheral));
         istance->agent = NewAgent("agent1", 0, 512, 1);
         istance->led  = NewBlinkLed("led", 100, 512, 1, 10);
-        istance->out1 = NewOutput("out1", 0, 512, 1, 25);
+        istance->out1 = NewOutput("out1", 0, 512, 1, 0);
+        istance->in1 = NewInput("in1", 0, 512, 1, 1, true);
     }
     return istance;
 }

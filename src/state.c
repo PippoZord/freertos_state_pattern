@@ -5,7 +5,7 @@
 #include "runtime.h"
 #include "peripheral.h"
 #include "agent.h"
-#include "output.h"
+#include "input.h"
 
 void StateIdle_Run(State *self, Context *context) {
     printf("RunIdle\n");
@@ -20,13 +20,8 @@ void StateIdle_Run(State *self, Context *context) {
 }
 
 void StateLoop_Run(State *self, Context *context) {
-    // Manual blink test for out1: toggle it, then read it straight back
-    // from hardware to prove Get/Set always agree, with no cache
-    // involved on either side. Stays in STATE_LOOP on purpose for now
-    // (transition below commented out) so this runs every cycle.
     printf("RunLoop");
-    SetOutputValue(context->peripheral->out1, !GetOutputValue(context->peripheral->out1));
-    printf("%d\n", GetOutputValue(context->peripheral->out1));
+    printf("%d\n", GetInputValue(context->peripheral->in1));
     //SetState(context, STATE_SUB);
 }
 
