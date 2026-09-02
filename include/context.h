@@ -1,6 +1,6 @@
 #ifndef CONTEXT_H
 #define CONTEXT_H
-
+#include "peripheral.h"
 // Forward declarations of the Context and State types, needed because
 // struct State below refers to Context only by pointer (see state.h).
 typedef struct Context Context;
@@ -40,6 +40,9 @@ struct Context {
     State loop;
     SubState sub;
     State error;
+    // The board's hardware (Agents), so any State can reach it without
+    // going through GetPeripheral() itself - set once in NewContext().
+    Peripheral *peripheral;
     State *current_state;
 };
 

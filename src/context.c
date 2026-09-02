@@ -5,6 +5,7 @@
 #include "pico/time.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "peripheral.h"
 
 Context NewContext() {
     Context ctx = {
@@ -14,6 +15,9 @@ Context NewContext() {
         .error = {.run_state =  StateError_Run},
         .current_state = NULL
     };
+    // Same singleton every time: created once, on whichever call to
+    // GetPeripheral() (here or elsewhere) happens first.
+    ctx.peripheral = GetPeripheral();
     return ctx;
 }
 
@@ -26,7 +30,7 @@ void RunCurrentState(void *pvParameters) {
             ctx->current_state,
             ctx
         );
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
     
 }

@@ -53,7 +53,7 @@ struct Agent {
  * @param behave Behaviour function called on every Run() cycle.
  * @param delete Delete function called from runtime to reset value of the agent
  */
-void Agent_Init(Agent *agent, char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, AgentBehaviour behave, AgentDelete delete);
+void Agent_Init(Agent *agent, char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, AgentBehaviour behave, AgentDelete delete);
 
 /**
  * @brief Allocate a new "base" Agent (default, no-op behaviour), initialize

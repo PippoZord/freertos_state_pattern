@@ -43,7 +43,7 @@ static void checkParameters(Agent *agent, char *name, int timeout, uint32_t uxSt
         panic("ERROR: delete function cannot be NULL");
 }
 
-void Agent_Init(Agent *agent, char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, AgentBehaviour behave, AgentDelete delete) {
+void Agent_Init(Agent *agent, char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, AgentBehaviour behave, AgentDelete delete) {
     checkParameters(agent, name, timeout,  uxStackDepth,  uxPriority,  behave, delete);
     agent->name = malloc(strlen(name) + 1);
     if (agent->name == NULL) panic("ERROR: During creation of a new agent: %s", name);
