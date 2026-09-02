@@ -3,7 +3,8 @@
  * @brief Implementation of Input: a plain GPIO input Agent with no
  * cached state of its own - GetInputValue() always talks to the
  * hardware directly (see the @brief on the Input struct in input.h
- * for why).
+ * for why). Optionally wires a caller-supplied interrupt callback
+ * straight into the SDK (see the @warning on NewInput in input.h).
  */
 
 #include "input.h"
@@ -36,12 +37,19 @@ static void Input_Delete(Agent *self) {
 }
 
 /** @copydoc NewInput */
-Input *NewInput(char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uint8_t gpio, bool pullUp) {
+Input *NewInput(char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uint8_t gpio, bool pullUp, uint32_t interruptEvents, void (*callback)(uint gpio, uint32_t events)) {
     Input *in = malloc(sizeof(Input));
     in->gpio = gpio;
     gpio_init(in->gpio);
     gpio_set_dir(in->gpio, false);
-    pullUp ? gpio_pull_up(in->gpio) : gpio_pull_down(in->gpio);
+    if (pullUp) {
+        gpio_pull_up(in->gpio);
+    } else {
+        gpio_pull_down(in->gpio);
+    }
+    if (callback != NULL) {
+        gpio_set_irq_enabled_with_callback(in->gpio, interruptEvents, true, callback);
+    }
     Agent_Init(&in->base, name, timeout, uxStackDepth, uxPriority, Input_Behave, Input_Delete);
     return in;
 }

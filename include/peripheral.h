@@ -5,6 +5,12 @@
     #include "output.h"
     #include "input.h"
 
+    #define MAX_CALLBACK 4
+    typedef struct {
+        uint gpio;
+        void (*callback)(uint gpio, uint32_t events);
+    } gpioCallback;
+
     /**
      * @brief Singleton owning every piece of hardware this board uses,
      * one explicitly typed field per device (created once in
@@ -17,9 +23,11 @@
      */
     typedef struct {
         Agent *agent;
+        gpioCallback gpiosCallback[MAX_CALLBACK];
         BlinkLed *led;
         Output *out1;
         Input *in1;
+        Input *in2;
     } Peripheral;
 
     /**
@@ -30,4 +38,5 @@
      * @return Peripheral* The singleton instance (never NULL).
      */
     Peripheral *GetPeripheral();
+    void AddGPIOCallBack(uint gpio,  void (*callback)(uint gpio, uint32_t events));
 #endif

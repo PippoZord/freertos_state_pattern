@@ -19,10 +19,18 @@ void StateIdle_Run(State *self, Context *context) {
     SetState(context, STATE_LOOP);
 }
 
+void Callback1(uint gpio, uint32_t events) {
+    printf("FromCallback 1\n");
+}
+
+
+void Callback2(uint gpio, uint32_t events) {
+    printf("FromCallback 2\n");
+}
+
 void StateLoop_Run(State *self, Context *context) {
-    printf("RunLoop");
-    printf("%d\n", GetInputValue(context->peripheral->in1));
-    //SetState(context, STATE_SUB);
+    AddGPIOCallBack(1, &Callback1);
+    AddGPIOCallBack(2, &Callback2);
 }
 
 
