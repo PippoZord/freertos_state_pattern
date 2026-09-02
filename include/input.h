@@ -49,6 +49,31 @@
     Input *NewInput(char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uint8_t pin, bool pullUp, uint32_t interruptEvents, void (*callback)(uint gpio, uint32_t events));
 
     /**
+     * @brief Configures in's GPIO (already allocated by the caller) -
+     * pull resistor and optional interrupt included - then delegates to
+     * Agent_Init() with the given behave/delete. Split out from
+     * NewInput() so a type that extends Input (embedding it as its own
+     * first field) can reuse this hardware setup while supplying its
+     * own behave()/delete(), instead of duplicating it - the same
+     * reasoning behind Output_Init() (see output.h). Same @warning as
+     * NewInput() applies to interruptEvents/callback.
+     *
+     * @param in Input to initialize (memory already allocated by the caller).
+     * @param pin GPIO pin number this Input reads.
+     * @param pullUp true = internal pull-up, false = internal pull-down.
+     * @param interruptEvents Which events raise the interrupt (OR of
+     * GPIO_IRQ_*); ignored if callback is NULL.
+     * @param callback Called on those events; NULL to disable the interrupt.
+     * @param behave Behaviour function to register with Agent_Init().
+     * @param delete Delete function to register with Agent_Init().
+     * @param name Name of the task/agent (copied internally, see Agent_Init).
+     * @param timeout Period in ms between behave() calls; use 0 (no task).
+     * @param stack Task stack depth, in words (moot if timeout == 0).
+     * @param prio FreeRTOS task priority (moot if timeout == 0).
+     */
+    void Input_Init(Input *in, uint8_t pin, bool pullUp, uint32_t interruptEvents, void (*callback)(uint gpio, uint32_t events), AgentBehaviour behave, AgentDelete delete, char *name, uint timeout, uint32_t stack, UBaseType_t prio);
+
+    /**
      * @brief Reads the GPIO pin's value directly from hardware - exact
      * at the moment of the call, never stale, since Input keeps no
      * cache of its own to fall behind.

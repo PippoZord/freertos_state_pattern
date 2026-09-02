@@ -36,10 +36,9 @@ static void Input_Delete(Agent *self) {
     gpio_deinit(in->gpio);
 }
 
-/** @copydoc NewInput */
-Input *NewInput(char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uint8_t gpio, bool pullUp, uint32_t interruptEvents, void (*callback)(uint gpio, uint32_t events)) {
-    Input *in = malloc(sizeof(Input));
-    in->gpio = gpio;
+/** @copydoc Input_Init */
+void Input_Init(Input *in, uint8_t pin, bool pullUp, uint32_t interruptEvents, void (*callback)(uint gpio, uint32_t events), AgentBehaviour behave, AgentDelete delete, char *name, uint timeout, uint32_t stack, UBaseType_t prio) {
+    in->gpio = pin;
     gpio_init(in->gpio);
     gpio_set_dir(in->gpio, false);
     if (pullUp) {
@@ -50,7 +49,13 @@ Input *NewInput(char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxP
     if (callback != NULL) {
         gpio_set_irq_enabled_with_callback(in->gpio, interruptEvents, true, callback);
     }
-    Agent_Init(&in->base, name, timeout, uxStackDepth, uxPriority, Input_Behave, Input_Delete);
+    Agent_Init(&in->base, name, timeout, stack, prio, behave, delete);
+}
+
+/** @copydoc NewInput */
+Input *NewInput(char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uint8_t gpio, bool pullUp, uint32_t interruptEvents, void (*callback)(uint gpio, uint32_t events)) {
+    Input *in = malloc(sizeof(Input));
+    Input_Init(in, gpio, pullUp, interruptEvents, callback, Input_Behave, Input_Delete, name, timeout, uxStackDepth, uxPriority);
     return in;
 }
 

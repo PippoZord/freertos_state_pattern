@@ -29,6 +29,26 @@
     Pwm *NewPwm(char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uint8_t pin);
 
     /**
+     * @brief Configures pwm's GPIO (already allocated by the caller) and
+     * starts its slice, then delegates to Agent_Init() with the given
+     * behave/delete. Split out from NewPwm() so a type that extends Pwm
+     * (embedding it as its own first field) can reuse this hardware
+     * setup while supplying its own behave()/delete(), instead of
+     * duplicating it - the same reasoning behind Output_Init() (see
+     * output.h).
+     *
+     * @param pwm Pwm to initialize (memory already allocated by the caller).
+     * @param pin GPIO pin number this Pwm drives.
+     * @param behave Behaviour function to register with Agent_Init().
+     * @param delete Delete function to register with Agent_Init().
+     * @param name Name of the task/agent (copied internally, see Agent_Init).
+     * @param timeout Period in ms between behave() calls; use 0 (no task).
+     * @param stack Task stack depth, in words (moot if timeout == 0).
+     * @param prio FreeRTOS task priority (moot if timeout == 0).
+     */
+    void Pwm_Init(Pwm *pwm, uint8_t pin, AgentBehaviour behave, AgentDelete delete, char *name, uint timeout, uint32_t stack, UBaseType_t prio);
+
+    /**
      * @brief Reads the channel's current compare level directly from
      * hardware - exact at the moment of the call, never stale, since
      * Pwm keeps no cache of its own to fall behind.

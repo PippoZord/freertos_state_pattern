@@ -37,15 +37,20 @@ static void Pwm_Delete(Agent *self) {
     gpio_deinit(pwm->gpio);
 }
 
-/** @copydoc NewPwm */
-Pwm *NewPwm(char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uint8_t pin) {
-    Pwm *pwm = malloc(sizeof(Pwm));
+/** @copydoc Pwm_Init */
+void Pwm_Init(Pwm *pwm, uint8_t pin, AgentBehaviour behave, AgentDelete delete, char *name, uint timeout, uint32_t stack, UBaseType_t prio) {
     pwm->gpio = pin;
     gpio_set_function(pin, GPIO_FUNC_PWM);
     uint slice_num = pwm_gpio_to_slice_num(pin);
     pwm_set_wrap(slice_num, 255);
     pwm_set_enabled(slice_num, true);
-    Agent_Init(&pwm->base, name, timeout, uxStackDepth, uxPriority, Pwm_Behave, Pwm_Delete);
+    Agent_Init(&pwm->base, name, timeout, stack, prio, behave, delete);
+}
+
+/** @copydoc NewPwm */
+Pwm *NewPwm(char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uint8_t pin) {
+    Pwm *pwm = malloc(sizeof(Pwm));
+    Pwm_Init(pwm, pin, Pwm_Behave, Pwm_Delete, name, timeout, uxStackDepth, uxPriority);
     return pwm;
 }
 
