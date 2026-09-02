@@ -1,32 +1,68 @@
 /**
  * @file state.c
  * @brief Placeholder run_state() implementations for the four concrete
- * states (idle, loop, sub, error). These don't do anything specific to
- * this board's hardware on purpose - they exist to show the state
- * pattern's own mechanism (self/context, and how SetState() moves from
- * one state to the next, forming the idle -> loop -> sub -> error ->
- * idle cycle described in the README), not to exercise any particular
- * Agent/Peripheral. Replace these bodies with real logic - context->
- * peripheral is already wired up and ready to use (see NewContext() in
- * context.c) - once you're building an actual state machine here.
+ * states (idle, loop, sub, error). Most of this doesn't do anything
+ * specific to the board's hardware on purpose - it exists to show the
+ * state pattern's own mechanism (self/context, and how SetState() moves
+ * from one state to the next). context->peripheral is already wired up
+ * and ready to use (see NewContext() in context.c).
+ *
+ * One real example is wired in: in2's GPIO interrupt drives a state
+ * transition to STATE_ERROR. in2CB() is the actual interrupt-facing
+ * handler (called by Peripheral's dispatcher, OnInGPIOInterrupt() in
+ * peripheral.c, itself running in real interrupt context) - it only
+ * sets a flag, on purpose: interrupts should do as little as possible.
+ * StateLoop_Run() checks that flag once per cycle, from the state
+ * machine's own task, and only there calls SetState() - nothing about
+ * the transition itself runs in interrupt context.
  */
 
 #include "context.h"
 #include "state.h"
+#include "runtime.h"
+#include "peripheral.h"
 #include <stdio.h>
+#include <stdbool.h>
+
+// Written from interrupt context (in2CB), read from task context
+// (StateLoop_Run). A single aligned bool read/write is atomic on
+// Cortex-M, so this needs no critical section - unlike
+// AddGPIOCallBack()'s multi-field table writes (see peripheral.c).
+static volatile bool in2Triggered = false;
+
+static void in2CB(uint gpio, uint32_t events) {
+    (void)gpio;
+    (void)events;
+    in2Triggered = true;
+}
 
 void StateIdle_Run(State *self, Context *context) {
     printf("RunIdle\n");
+    Input *in2 = (Input *)GetAgentByName("in2");
+    if (in2 != NULL) {
+        AddGPIOCallBack(in2->gpio, in2CB);
+    }
+    Output *out = (Output *)GetAgentByName("out1");
+    if (out != NULL) {
+        SetOutputValue(out, true);
+    }
     SetState(context, STATE_LOOP);
 }
 
 void StateLoop_Run(State *self, Context *context) {
-    printf("RunLoop\n");
-    SetState(context, STATE_SUB);
+    if (in2Triggered) {
+        in2Triggered = false;
+        SetState(context, STATE_ERROR);
+    }
 }
 
 void StateError_Run(State *self, Context *context) {
     printf("RunError\n");
+
+    Agent *led = GetAgentByName("led");
+    if (led != NULL) {
+        DeleteAgent(led);
+    }
     SetState(context, STATE_IDLE);
 }
 

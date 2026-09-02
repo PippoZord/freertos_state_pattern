@@ -91,8 +91,8 @@ Agent *NewAgent(char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPr
 /** @copydoc PrintInfo */
 void PrintInfo(Agent *agent) {
     if (agent == NULL) return;
-    printf("\tNAME = %s\tTIMEOUT=%d\tSTACK=%u\tPRIO=%lu\n",
-           agent->name, agent->timeout, agent->uxStackDepth, (unsigned long)agent->uxPriority);
+    printf("\tNAME = %s\tTIMEOUT=%d\tSTACK=%lu\tPRIO=%lu\n",
+           agent->name, agent->timeout, (unsigned long)agent->uxStackDepth, (unsigned long)agent->uxPriority);
 }
 
 /** @copydoc Run */

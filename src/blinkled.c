@@ -16,7 +16,7 @@
 static void BlinkLed_Behave(Agent *self) {
     BlinkLed *led = (BlinkLed *)self;
     led->state = !led->state;
-    gpio_put(led->pin, led->state);
+    SetOutputValue(&led->base, led->state);
 }
 
 /**
@@ -27,17 +27,14 @@ static void BlinkLed_Behave(Agent *self) {
  */
 static void Blinked_Delete(Agent *self) {
     BlinkLed *led = (BlinkLed *)self;
-    led->state = 0;
-    gpio_put(led->pin, 0);
+    led->state = false;
+    SetOutputValue(&led->base, false);
 }
 
-/** @copydoc NewBlinkLed */
-BlinkLed *NewBlinkLed(char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uint8_t pin) {
+
+BlinkLed *NewBlinkLed(char *name, int timeout, uint32_t stack, UBaseType_t prio, uint8_t pin) {
     BlinkLed *led = malloc(sizeof(BlinkLed));
-    led->pin = pin;
     led->state = false;
-    gpio_init(pin);
-    gpio_set_dir(pin, GPIO_OUT);
-    Agent_Init(&led->base, name, timeout, uxStackDepth, uxPriority, BlinkLed_Behave, Blinked_Delete);
+    Output_Init(&led->base, pin, BlinkLed_Behave, Blinked_Delete, name, timeout, stack, prio);
     return led;
 }

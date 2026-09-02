@@ -32,13 +32,17 @@ static void Output_Delete(Agent *self) {
     gpio_put(out->gpio, 0);
 }
 
-/** @copydoc NewOutput */
-Output *NewOutput(char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uint8_t gpio) {
+
+void Output_Init(Output *out, uint8_t pin, AgentBehaviour behave, AgentDelete delete, char *name, uint timeout, uint32_t stack, UBaseType_t prio) {
+    out->gpio = pin;
+    gpio_init(pin);
+    gpio_set_dir(pin, true);
+    Agent_Init(&out->base, name, timeout, stack, prio, behave, delete);
+}
+
+Output *NewOutput(char *name, uint timeout, uint32_t stack, UBaseType_t prio, uint8_t pin) {
     Output *out = malloc(sizeof(Output));
-    out->gpio = gpio;
-    gpio_init(out->gpio);
-    gpio_set_dir(out->gpio, true);
-    Agent_Init(&out->base, name, timeout, uxStackDepth, uxPriority, Output_Behave, Output_Delete);
+    Output_Init(out, pin, Output_Behave, Output_Delete, name, timeout, stack, prio);
     return out;
 }
 

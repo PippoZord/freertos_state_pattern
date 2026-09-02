@@ -19,9 +19,9 @@
 static Peripheral *istance = NULL;
 
 /**
- * @brief in1's interrupt callback, passed straight to NewInput(). Per
+ * @brief in2's interrupt callback, passed straight to NewInput(). Per
  * the @warning on NewInput (see input.h), this is the ONE GPIO
- * interrupt callback in effect for the whole core for as long as in1
+ * interrupt callback in effect for the whole core for as long as in2
  * exists - creating another interrupt-enabled Input would replace it.
  *
  * @param gpio Which GPIO fired.
@@ -38,11 +38,10 @@ static void OnInGPIOInterrupt(uint gpio, uint32_t events) {
 Peripheral *GetPeripheral() {
     if (istance == NULL) {
         istance = malloc(sizeof(Peripheral));
-        istance->agent = NewAgent("agent1", 0, 512, 1);
-        istance->out1 = NewOutput("out1", 0, 512,1, 4);
-        istance->pwm = NewPwm("pwm1", 0, 512,1,25);
-        istance->in1 = NewInput("in1", 0, 512, 1, 1, true, GPIO_IRQ_EDGE_RISE, OnInGPIOInterrupt);
-        istance->in2 = NewInput("in2", 0, 512, 1, 2, true, GPIO_IRQ_EDGE_RISE, OnInGPIOInterrupt);
+        //istance->agent = NewAgent("agent1", 0, 512, 1);
+        istance->out1 = NewOutput("out1", 0, 512,1, 1);
+        istance->led = NewBlinkLed("led", 100, 512,1, 25);
+        istance->in2 = NewInput("in2", 0, 512, 1, 0, true, GPIO_IRQ_EDGE_RISE, OnInGPIOInterrupt);
         for (int i = 0; i < MAX_CALLBACK; i++)
             istance->gpiosCallback[i] = (gpioCallback){ .gpio = -1, .callback = NULL };
     }

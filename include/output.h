@@ -31,6 +31,11 @@
      */
     Output *NewOutput(char *name, uint timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uint8_t pin);
 
+
+    
+    void Output_Init(Output *out, uint8_t pin, AgentBehaviour behave, AgentDelete delete, char *name, uint timeout, uint32_t stack, UBaseType_t prio);
+
+
     /**
      * @brief Drives the GPIO pin high or low.
      *
