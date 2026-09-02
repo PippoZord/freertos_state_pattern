@@ -6,16 +6,11 @@
 #include "peripheral.h"
 #include "agent.h"
 #include "input.h"
+#include "pwm.h"
 
 void StateIdle_Run(State *self, Context *context) {
     printf("RunIdle\n");
-    Agent *agent = GetAgentByName("agent1");
-    if (agent == NULL) {
-        printf("Non c'è Agent\n");
-        SetState(context, STATE_LOOP);
-        return;
-    }
-    printf("%s %d\n", agent->name, agent->timeout);
+    SetOutputValue((Output *)GetAgentByName("out1"), true);
     SetState(context, STATE_LOOP);
 }
 
@@ -31,6 +26,10 @@ void Callback2(uint gpio, uint32_t events) {
 void StateLoop_Run(State *self, Context *context) {
     AddGPIOCallBack(1, &Callback1);
     AddGPIOCallBack(2, &Callback2);
+    Pwm *pwm = (Pwm *)GetAgentByName("pwm1");
+    uint16_t val = GetPwmValue(pwm);
+    if (val != 255)
+        SetPwmValue(pwm, val+1);
 }
 
 

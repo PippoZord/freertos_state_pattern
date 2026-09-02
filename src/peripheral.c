@@ -39,8 +39,8 @@ Peripheral *GetPeripheral() {
     if (istance == NULL) {
         istance = malloc(sizeof(Peripheral));
         istance->agent = NewAgent("agent1", 0, 512, 1);
-        istance->led  = NewBlinkLed("led", 100, 512, 1, 10);
-        istance->out1 = NewOutput("out1", 0, 512, 1, 0);
+        istance->out1 = NewOutput("out1", 0, 512,1, 4);
+        istance->pwm = NewPwm("pwm1", 0, 512,1,25);
         istance->in1 = NewInput("in1", 0, 512, 1, 1, true, GPIO_IRQ_EDGE_RISE, OnInGPIOInterrupt);
         istance->in2 = NewInput("in2", 0, 512, 1, 2, true, GPIO_IRQ_EDGE_RISE, OnInGPIOInterrupt);
         for (int i = 0; i < MAX_CALLBACK; i++)
