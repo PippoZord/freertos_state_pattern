@@ -5,6 +5,7 @@
  */
 
 #include <stdlib.h>
+#include "hardware/gpio.h"
 #include "blinkled.h"
 
 /**
@@ -20,8 +21,11 @@ static void BlinkLed_Behave(Agent *self) {
 }
 
 /**
- * @brief Turns the LED off before the BlinkLed is freed, so deleting
- * one doesn't leave it lit.
+ * @brief Turns the LED off, then releases its pin, before the BlinkLed
+ * is freed: SetOutputValue(false) leaves it dark for the brief moment
+ * it's still SIO-driven, and gpio_deinit() then detaches the pin from
+ * the SIO peripheral entirely, so deleting a BlinkLed doesn't leave its
+ * pin claimed as an output behind.
  *
  * @param self The BlinkLed being deleted, as its base Agent.
  */
@@ -29,6 +33,7 @@ static void Blinked_Delete(Agent *self) {
     BlinkLed *led = (BlinkLed *)self;
     led->state = false;
     SetOutputValue(&led->base, false);
+    gpio_deinit(led->base.gpio);
 }
 
 

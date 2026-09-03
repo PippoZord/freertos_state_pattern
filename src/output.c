@@ -22,14 +22,18 @@ static void Output_Behave(Agent *self) {
 }
 
 /**
- * @brief Drives the pin low before the Output is freed, so deleting one
- * doesn't leave its GPIO in whatever state it last happened to be in.
+ * @brief Drives the pin low, then releases it, before the Output is
+ * freed: gpio_put(0) leaves it in a defined state for the brief moment
+ * it's still SIO-driven, and gpio_deinit() then detaches it from the
+ * SIO peripheral entirely, so deleting an Output doesn't leave its pin
+ * claimed as an output behind - matching Input_Delete/Pwm_Delete.
  *
  * @param self The Output being deleted, as its base Agent.
  */
 static void Output_Delete(Agent *self) {
     Output *out = (Output *)self;
     gpio_put(out->gpio, 0);
+    gpio_deinit(out->gpio);
 }
 
 
