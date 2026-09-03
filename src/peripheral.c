@@ -38,7 +38,6 @@ static void OnInGPIOInterrupt(uint gpio, uint32_t events) {
 Peripheral *GetPeripheral() {
     if (istance == NULL) {
         istance = malloc(sizeof(Peripheral));
-        //istance->agent = NewAgent("agent1", 0, 512, 1);
         istance->out1 = NewOutput("out1", 0, 512,1, 1);
         istance->led = NewBlinkLed("led", 100, 512,1, 25);
         istance->in2 = NewInput("in2", 0, 512, 1, 0, true, GPIO_IRQ_EDGE_RISE, OnInGPIOInterrupt);

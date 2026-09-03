@@ -4,7 +4,6 @@
     #include "blinkled.h"
     #include "output.h"
     #include "input.h"
-    #include "pwm.h"
 
     #define MAX_CALLBACK 4
     typedef struct {
@@ -23,19 +22,16 @@
      * without a cast at every use site.
      */
     typedef struct {
-        Agent *agent;
         gpioCallback gpiosCallback[MAX_CALLBACK];
         BlinkLed *led;
         Output *out1;
-        Input *in1;
         Input *in2;
-        Pwm *pwm;
     } Peripheral;
 
     /**
      * @brief Get the process-wide Peripheral singleton, creating and
-     * wiring up every device (as Agents, via NewAgent()/NewBlinkLed()/
-     * NewOutput()) on the first call.
+     * wiring up every device (as Agents, via NewBlinkLed()/NewOutput()/
+     * NewInput()) on the first call.
      *
      * @return Peripheral* The singleton instance (never NULL).
      */
