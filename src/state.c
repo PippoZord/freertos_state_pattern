@@ -7,14 +7,13 @@
  * from one state to the next). context->peripheral is already wired up
  * and ready to use (see NewContext() in context.c).
  *
- * One real example is wired in: in2's GPIO interrupt drives a state
- * transition to STATE_ERROR. in2CB() is the actual interrupt-facing
- * handler (called by Peripheral's dispatcher, OnInGPIOInterrupt() in
- * peripheral.c, itself running in real interrupt context) - it only
- * sets a flag, on purpose: interrupts should do as little as possible.
- * StateLoop_Run() checks that flag once per cycle, from the state
- * machine's own task, and only there calls SetState() - nothing about
- * the transition itself runs in interrupt context.
+ * One real example is wired in: StateLoop_Run() reads in2 (a
+ * ToggleButton) every cycle and prints its current state. Unlike an
+ * earlier version of this file, no GPIO interrupt handling happens
+ * here at all - ToggleButton wires its own interrupt straight into
+ * Peripheral's dispatcher and debounces internally (see togglebutton.c)
+ * - state.c only ever sees the already-debounced result via
+ * GetToggleButtonState().
  */
 
 #include "context.h"
@@ -23,25 +22,18 @@
 #include "peripheral.h"
 #include <stdio.h>
 #include <stdbool.h>
-
-// Written from interrupt context (in2CB), read from task context
-// (StateLoop_Run). A single aligned bool read/write is atomic on
-// Cortex-M, so this needs no critical section - unlike
-// AddGPIOCallBack()'s multi-field table writes (see peripheral.c).
-static volatile bool in2Triggered = false;
-
-static void in2CB(uint gpio, uint32_t events) {
-    (void)gpio;
-    (void)events;
-    in2Triggered = true;
-}
+#include "togglebutton.h"
 
 void StateIdle_Run(State *self, Context *context) {
+    SetOutputValue((Output *)GetAgentByName("out1"), 1);
     SetState(context, STATE_LOOP);
 }
 
 void StateLoop_Run(State *self, Context *context) {
-    
+    ToggleButton *tb = (ToggleButton *)GetAgentByName("in2");
+    if (tb != NULL) {
+        printf("%d\n", GetToggleButtonState(tb));
+    }
 }
 
 void StateError_Run(State *self, Context *context) {

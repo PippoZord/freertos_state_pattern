@@ -13,21 +13,14 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "blinkled.h"
+#include "togglebutton.h"
 
 
 /** @brief Process-wide Peripheral singleton; NULL until the first GetPeripheral() call. */
 static Peripheral *istance = NULL;
 
-/**
- * @brief in2's interrupt callback, passed straight to NewInput(). Per
- * the @warning on NewInput (see input.h), this is the ONE GPIO
- * interrupt callback in effect for the whole core for as long as in2
- * exists - creating another interrupt-enabled Input would replace it.
- *
- * @param gpio Which GPIO fired.
- * @param events Which event(s) fired (see GPIO_IRQ_* in hardware/gpio.h).
- */
-static void OnInGPIOInterrupt(uint gpio, uint32_t events) {
+/** @copydoc OnInGPIOInterrupt */
+void OnInGPIOInterrupt(uint gpio, uint32_t events) {
     for (int i = 0; i<MAX_CALLBACK; i++) {
         if (istance->gpiosCallback[i].gpio == gpio)
             istance->gpiosCallback[i].callback(gpio, events);
@@ -38,11 +31,22 @@ static void OnInGPIOInterrupt(uint gpio, uint32_t events) {
 Peripheral *GetPeripheral() {
     if (istance == NULL) {
         istance = malloc(sizeof(Peripheral));
-        istance->out1 = NewOutput("out1", 0, 512,1, 1);
-        istance->fled = NewFadeLed("fled", 10, 512, 1, 25, 10);
-        istance->in2 = NewInput("in2", 0, 512, 1, 0, true, GPIO_IRQ_EDGE_RISE, OnInGPIOInterrupt);
+        // Reset the callback table BEFORE creating any device: in2's
+        // NewToggleButton() below registers itself into this table via
+        // AddGPIOCallBack() as it's created, so resetting the table
+        // afterward would wipe that registration out - which is exactly
+        // what happened here before this comment existed.
         for (int i = 0; i < MAX_CALLBACK; i++)
             istance->gpiosCallback[i] = (gpioCallback){ .gpio = -1, .callback = NULL };
+        // out1 (pin 1) powers the capacitive touch module - driven high
+        // in StateIdle_Run - while in2 (pin 0) reads its signal output.
+        // Must be two different pins: in2 was briefly also on pin 1,
+        // which fought with out1 for the same GPIO - whichever
+        // Input_Init() ran last reconfigured the pin back to input,
+        // undoing out1's output drive and cutting power to the module.
+        istance->out1 = NewOutput("out1", 0, 512,1,1);
+        istance->fled = NewFadeLed("fled", 10, 512, 1, 14, 10);
+        istance->in2 = NewToggleButton("in2", 0, true, GPIO_IRQ_EDGE_FALL, 512, 1);
     }
     return istance;
 }

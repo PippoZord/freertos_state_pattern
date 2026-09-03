@@ -24,14 +24,23 @@ static void Input_Behave(Agent *self) {
 }
 
 /**
- * @brief Releases the pin before the Input is freed: detaches it from
- * the GPIO/SIO peripheral (gpio_deinit) and clears its pull resistor,
- * so deleting an Input doesn't leave it configured behind.
+ * @brief Releases the pin before the Input is freed: disables any
+ * interrupt trigger still armed on it, detaches it from the GPIO/SIO
+ * peripheral (gpio_deinit) and clears its pull resistor, so deleting
+ * an Input doesn't leave it configured - or listening - behind.
+ *
+ * @warning gpio_deinit() alone does NOT disable a pin's interrupt:
+ * that's a separate register (see gpio_set_irq_enabled()) untouched by
+ * a function-select change. Without this, the pin is left floating
+ * (function NULL, pulls disabled) with its interrupt still armed -
+ * electrical noise on a floating pin can trigger a genuine spurious
+ * interrupt for an Input that no longer exists.
  *
  * @param self The Input being deleted, as its base Agent.
  */
 static void Input_Delete(Agent *self) {
     Input *in = (Input *)self;
+    gpio_set_irq_enabled(in->gpio, GPIO_IRQ_LEVEL_LOW | GPIO_IRQ_LEVEL_HIGH | GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, false);
     gpio_disable_pulls(in->gpio);
     gpio_deinit(in->gpio);
 }

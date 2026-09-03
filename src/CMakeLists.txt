@@ -9,6 +9,7 @@ add_executable(${NAME}
         output.c
         input.c
         pwm.c
+        togglebutton.c
         fadeled.c
         )
 
