@@ -9,6 +9,7 @@ add_executable(${NAME}
         output.c
         input.c
         pwm.c
+        fadeled.c
         )
 
 # Header search path for our own .h files (project_root/include)

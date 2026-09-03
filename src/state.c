@@ -37,32 +37,14 @@ static void in2CB(uint gpio, uint32_t events) {
 }
 
 void StateIdle_Run(State *self, Context *context) {
-    printf("RunIdle\n");
-    Input *in2 = (Input *)GetAgentByName("in2");
-    if (in2 != NULL) {
-        AddGPIOCallBack(in2->gpio, in2CB);
-    }
-    Output *out = (Output *)GetAgentByName("out1");
-    if (out != NULL) {
-        SetOutputValue(out, true);
-    }
     SetState(context, STATE_LOOP);
 }
 
 void StateLoop_Run(State *self, Context *context) {
-    if (in2Triggered) {
-        in2Triggered = false;
-        SetState(context, STATE_ERROR);
-    }
+    
 }
 
 void StateError_Run(State *self, Context *context) {
-    printf("RunError\n");
-
-    Agent *led = GetAgentByName("led");
-    if (led != NULL) {
-        DeleteAgent(led);
-    }
     SetState(context, STATE_IDLE);
 }
 

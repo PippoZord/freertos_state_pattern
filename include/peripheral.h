@@ -4,6 +4,7 @@
     #include "blinkled.h"
     #include "output.h"
     #include "input.h"
+    #include "fadeled.h"
 
     #define MAX_CALLBACK 4
     typedef struct {
@@ -23,9 +24,9 @@
      */
     typedef struct {
         gpioCallback gpiosCallback[MAX_CALLBACK];
-        BlinkLed *led;
         Output *out1;
         Input *in2;
+        FadeLed *fled;
     } Peripheral;
 
     /**
