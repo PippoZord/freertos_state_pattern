@@ -11,6 +11,7 @@ add_executable(${NAME}
         pwm.c
         togglebutton.c
         fadeled.c
+        uart.c
         )
 
 # Header search path for our own .h files (project_root/include)
@@ -22,6 +23,7 @@ target_include_directories(${NAME} PRIVATE
 target_link_libraries(${NAME}
     pico_stdlib
     hardware_pwm # for pwm.c (hardware/pwm.h)
+    hardware_uart # for pwm.c (hardware/pwm.h)
 	FreeRTOS-Kernel-Heap4 # FreeRTOS kernel and dynamic heap
     freertos_config
     )

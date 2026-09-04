@@ -7,13 +7,10 @@
  * from one state to the next). context->peripheral is already wired up
  * and ready to use (see NewContext() in context.c).
  *
- * One real example is wired in: StateLoop_Run() reads in2 (a
- * ToggleButton) every cycle and prints its current state. Unlike an
- * earlier version of this file, no GPIO interrupt handling happens
- * here at all - ToggleButton wires its own interrupt straight into
- * Peripheral's dispatcher and debounces internally (see togglebutton.c)
- * - state.c only ever sees the already-debounced result via
- * GetToggleButtonState().
+ * One real example is wired in: StateLoop_Run() sends a fixed 6-byte
+ * message over uart every cycle, then reads back whatever is already
+ * available (see UartWrite()/UartRead() in uart.h) - non-blocking, so it
+ * may print fewer than 6 bytes if the reply hasn't fully arrived yet.
  */
 
 #include "context.h"
@@ -22,17 +19,28 @@
 #include "peripheral.h"
 #include <stdio.h>
 #include <stdbool.h>
-#include "togglebutton.h"
 
 void StateIdle_Run(State *self, Context *context) {
-    SetOutputValue((Output *)GetAgentByName("out1"), 1);
     SetState(context, STATE_LOOP);
 }
 
 void StateLoop_Run(State *self, Context *context) {
-    ToggleButton *tb = (ToggleButton *)GetAgentByName("in2");
-    if (tb != NULL) {
-        printf("%d\n", GetToggleButtonState(tb));
+    Uart *u = (Uart *)GetAgentByName("uart");
+    if (u == NULL) {
+        return;
+    }
+
+    uint8_t out[] = {0x02, 0x06, 0x01, 0x00, 0x00, 0x05};
+    UartWrite(u, out, sizeof(out));
+
+    uint8_t in[12];
+    uint n = UartRead(u, in, sizeof(in));
+    if (n > 0) {
+        printf("uart rx (%u bytes):", n);
+        for (uint i = 0; i < n; i++) {
+            printf(" %02x", in[i]);
+        }
+        printf("\n");
     }
 }
 
