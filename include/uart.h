@@ -48,6 +48,8 @@
      * @return Uart* Newly heap-allocated Uart, ready for UartWrite()/UartRead().
      */
     Uart *NewUart(char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uart_inst_t *uart, uint tx, uint rx, uint baudrate, uint expectedLen);
+    
+void Uart_Init(Uart *u, uart_inst_t *uart, uint tx, uint rx, uint baudrate, uint expectedLen, char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority);
 
     /**
      * @brief Writes len bytes out over TX. Blocking (uart_putc() per byte).

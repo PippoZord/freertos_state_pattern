@@ -13,35 +13,34 @@
  * may print fewer than 6 bytes if the reply hasn't fully arrived yet.
  */
 
+#include <stdio.h>
+#include <stdbool.h>
 #include "context.h"
 #include "state.h"
 #include "runtime.h"
 #include "peripheral.h"
-#include <stdio.h>
-#include <stdbool.h>
 
 void StateIdle_Run(State *self, Context *context) {
     SetState(context, STATE_LOOP);
 }
 
 void StateLoop_Run(State *self, Context *context) {
-    Uart *u = (Uart *)GetAgentByName("uart");
+    ThyoneI *u = (ThyoneI *)GetAgentByName("uart");
     if (u == NULL) {
         return;
     }
 
-    uint8_t out[] = {0x02, 0x06, 0x01, 0x00, 0x00, 0x05};
-    UartWrite(u, out, sizeof(out));
-
-    uint8_t in[12];
-    uint n = UartRead(u, in, sizeof(in));
-    if (n > 0) {
-        printf("uart rx (%u bytes):", n);
-        for (uint i = 0; i < n; i++) {
-            printf(" %02x", in[i]);
-        }
-        printf("\n");
-    }
+    uint8_t msg[512] = {0x00};
+    uint8_t addr[4] = {0x5A, 0xF0, 0x00, 0x6C};
+    uint8_t out[6] = {0x00};
+    
+    ThyoneISendToAddress(u, addr, msg, 512);
+    ThyoneIRead(u, out, 6);
+    for (int i=0;i<6;i++) printf("%d ", out[i]);
+    printf("\n");
+    ThyoneIRead(u, out, 6);
+    for (int i=0;i<6;i++) printf("%d ", out[i]);
+    printf("\n");
 }
 
 void StateError_Run(State *self, Context *context) {

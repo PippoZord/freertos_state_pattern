@@ -6,7 +6,7 @@
     #include "input.h"
     #include "fadeled.h"
     #include "togglebutton.h"
-    #include "uart.h"
+    #include "thyonei.h"
 
     #define MAX_CALLBACK 4
     typedef struct {
@@ -26,7 +26,7 @@
      */
     typedef struct {
         gpioCallback gpiosCallback[MAX_CALLBACK];
-        Uart *u;
+        ThyoneI *u;
     } Peripheral;
 
     /**

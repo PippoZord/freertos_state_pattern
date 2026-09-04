@@ -36,7 +36,7 @@ Peripheral *GetPeripheral() {
         // uart1 on gpio 8/9: pins 16/17 stay reserved for stdio's own
         // debug UART (PICO_DEFAULT_UART_TX/RX_PIN, see src/CMakeLists.txt),
         // so this uses a separate physical UART peripheral and pins.
-        istance->u = NewUart("uart", 100, 1024, 1, uart1, 8, 9, 115200, 6);
+        istance->u = NewThyoneI("uart", 100, 1024, 1, uart1, 8, 9, 115200, 6);
     }
     return istance;
 }

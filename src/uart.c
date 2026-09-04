@@ -34,11 +34,7 @@ static void Uart_Delete(Agent *self) {
     gpio_deinit(u->rx);
 }
 
-/** @copydoc NewUart */
-Uart *NewUart(char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uart_inst_t *uart, uint tx, uint rx, uint baudrate, uint expectedLen) {
-    (void)expectedLen; // unused for now - no interrupt-driven message accumulation yet, see uart.h
-
-    Uart *u = malloc(sizeof(Uart));
+void Uart_Init(Uart *u, uart_inst_t *uart, uint tx, uint rx, uint baudrate, uint expectedLen, char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority) {
     u->rx = rx;
     u->tx = tx;
     u->baudrate = baudrate;
@@ -56,6 +52,13 @@ Uart *NewUart(char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPrio
     uart_set_fifo_enabled(uart, true);
 
     Agent_Init(&u->base, name, timeout, uxStackDepth, uxPriority, Uart_Behave, Uart_Delete);
+}
+
+/** @copydoc NewUart */
+Uart *NewUart(char *name, int timeout, uint32_t uxStackDepth, UBaseType_t uxPriority, uart_inst_t *uart, uint tx, uint rx, uint baudrate, uint expectedLen) {
+    (void)expectedLen; // unused for now - no interrupt-driven message accumulation yet, see uart.h
+    Uart *u = malloc(sizeof(Uart));
+    Uart_Init(u, uart, tx, rx, baudrate, expectedLen, name, timeout, uxStackDepth, uxPriority);
     return u;
 }
 

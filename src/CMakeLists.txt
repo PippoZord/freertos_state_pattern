@@ -12,6 +12,7 @@ add_executable(${NAME}
         togglebutton.c
         fadeled.c
         uart.c
+        thyonei.c
         )
 
 # Header search path for our own .h files (project_root/include)
