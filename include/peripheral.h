@@ -30,6 +30,7 @@
         gpioCallback gpiosCallback[MAX_CALLBACK];
         ThyoneI *u;
         InternalTemperature *temp;
+        BlinkLed *led;
     } Peripheral;
 
     /**

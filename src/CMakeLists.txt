@@ -15,6 +15,7 @@ add_executable(${NAME}
         adc.c
         internaltemperature.c
         thyonei.c
+        powman_sleep.c
         )
 
 # Header search path for our own .h files (project_root/include)
@@ -28,6 +29,7 @@ target_link_libraries(${NAME}
     hardware_pwm # for pwm.c (hardware/pwm.h)
     hardware_uart # for uart.c (hardware/uart.h)
     hardware_adc # for adc.c (hardware/adc.h)
+    hardware_sync # for powman_sleep.c (__wfi())
 	FreeRTOS-Kernel-Heap4 # FreeRTOS kernel and dynamic heap
     freertos_config
     )
@@ -44,6 +46,11 @@ target_compile_definitions(${NAME} PRIVATE
     PICO_DEFAULT_UART_TX_PIN=16
     # stdio_init_all() aspetta la connessione USB CDC (invece di scrivere nel
     # vuoto e perdere i primi byte se il terminale non e' ancora collegato).
-    # -1 = attesa indefinita.
-    PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS=-1
+    # -1 = attesa indefinita: BLOCCA main() per sempre se nessun terminale
+    # apre la porta seriale (es. durante una misura di corrente senza
+    # terminale collegato) - lo scheduler non parte mai, niente gira, mai.
+    # Un timeout limitato lascia comunque qualche secondo di margine per
+    # collegare un terminale prima di perdere i primi printf, ma garantisce
+    # che il boot prosegua comunque anche a terminale scollegato.
+    PICO_STDIO_USB_CONNECT_WAIT_TIMEOUT_MS=2000
 )
