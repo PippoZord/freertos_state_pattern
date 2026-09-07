@@ -7,39 +7,44 @@
 
 #include "adc.h"
 #include <stdlib.h>
+#include <stdbool.h>
 #include "hardware/gpio.h"
 #include "hardware/adc.h"
 
-/**
- * @brief Adc keeps no cache to refresh, so there is nothing periodic
- * to do; this exists only because Agent_Init() requires a non-NULL
- * behave(). Pair it with timeout == 0 so no task is even created for it.
- *
- * @param self The agent itself (unused).
- */
-static void Adc_Behave(Agent *self) {
+/** @copydoc Adc_Behave */
+void Adc_Behave(Agent *self) {
     (void)self;
 }
 
-/**
- * @brief Releases the GPIO pin before the Adc is freed. There is no
- * adc_deinit() in the SDK (the ADC peripheral itself is shared, not
- * owned per-channel), so the only thing this Adc owns exclusively is
- * its pin - gpio_deinit() detaches it from the analog input (undoing
- * adc_gpio_init()) the same way every other Delete in this project
- * releases its own pin.
- *
- * @param self The Adc being deleted, as its base Agent.
- */
-static void Adc_Delete(Agent *self) {
+/** @copydoc Adc_Delete */
+void Adc_Delete(Agent *self) {
     Adc *adc = (Adc *)self;
-    gpio_deinit(adc->gpio);
+    if (adc->gpio != ADC_GPIO_NONE) {
+        gpio_deinit(adc->gpio);
+    }
 }
+
+/**
+ * @brief Whether adc_init() has already run. It resets the whole
+ * shared ADC peripheral (see hardware_adc's adc_init(): a full
+ * reset_unreset plus adc_hw->cs = ADC_CS_EN_BITS, which clears every
+ * other bit - including the temperature sensor's enable bit set by a
+ * previously-constructed InternalTemperature). Since every Adc/
+ * InternalTemperature shares one physical ADC, Adc_Init() must only
+ * call adc_init() the first time, or constructing a second Adc-family
+ * object would silently reset state a sibling object already set up.
+ */
+static bool adc_initialized = false;
 
 /** @copydoc Adc_Init */
 void Adc_Init(Adc *adc, uint8_t pin, uint8_t channel, AgentBehaviour behave, AgentDelete delete, char *name, uint timeout, uint32_t stack, UBaseType_t prio) {
-    adc_init();
-    adc_gpio_init(pin);
+    if (!adc_initialized) {
+        adc_init();
+        adc_initialized = true;
+    }
+    if (pin != ADC_GPIO_NONE) {
+        adc_gpio_init(pin);
+    }
     adc->gpio = pin;
     adc->channel = channel;
     Agent_Init(&adc->base, name, timeout, stack, prio, behave, delete);

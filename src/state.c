@@ -17,7 +17,9 @@
  * another device - those arrive on their own, via ThyoneI's own
  * background task, independently of whether/when we're sending. It
  * also reads the Adc wired to GPIO26 (see GetAdcValue() in adc.h) every
- * cycle and prints the raw 12-bit sample.
+ * cycle and prints the raw 12-bit sample, and the chip's internal
+ * temperature sensor (see GetInternalTemperatureCelsius() in
+ * internaltemperature.h).
  */
 
 #include <stdio.h>
@@ -33,9 +35,10 @@ void StateIdle_Run(State *self, Context *context) {
 
 void StateLoop_Run(State *self, Context *context) {
 
-    Adc *adc = (Adc *)GetAgentByName("adc");
-    if (adc != NULL) {
-        printf("adc (gpio26) = %u\n", GetAdcValue(adc));
+
+    InternalTemperature *temp = (InternalTemperature *)GetAgentByName("temp");
+    if (temp != NULL) {
+        printf("internal temperature = %.2f C\n", GetInternalTemperatureCelsius(temp));
     }
 }
 

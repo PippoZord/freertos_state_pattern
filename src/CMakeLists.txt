@@ -13,6 +13,7 @@ add_executable(${NAME}
         fadeled.c
         uart.c
         adc.c
+        internaltemperature.c
         thyonei.c
         )
 

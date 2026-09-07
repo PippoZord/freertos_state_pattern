@@ -8,6 +8,7 @@
     #include "togglebutton.h"
     #include "thyonei.h"
     #include "adc.h"
+    #include "internaltemperature.h"
 
     #define MAX_CALLBACK 4
     typedef struct {
@@ -28,7 +29,7 @@
     typedef struct {
         gpioCallback gpiosCallback[MAX_CALLBACK];
         ThyoneI *u;
-        Adc *adc;
+        InternalTemperature *temp;
     } Peripheral;
 
     /**

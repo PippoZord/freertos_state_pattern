@@ -34,7 +34,7 @@ Peripheral *GetPeripheral() {
         for (int i = 0; i < MAX_CALLBACK; i++)
             istance->gpiosCallback[i] = (gpioCallback){ .gpio = -1, .callback = NULL };
         istance->u = NewThyoneI("uart", 10, 1024, 1, uart1, 8, 9, 115200);
-        istance->adc = NewAdc("adc", 0, 512, 1, 26, 0);
+        istance->temp = NewInternalTemperature("temp", 0, 512, 1);
     }
     return istance;
 }
