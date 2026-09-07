@@ -7,6 +7,7 @@
     #include "fadeled.h"
     #include "togglebutton.h"
     #include "thyonei.h"
+    #include "adc.h"
 
     #define MAX_CALLBACK 4
     typedef struct {
@@ -27,6 +28,7 @@
     typedef struct {
         gpioCallback gpiosCallback[MAX_CALLBACK];
         ThyoneI *u;
+        Adc *adc;
     } Peripheral;
 
     /**

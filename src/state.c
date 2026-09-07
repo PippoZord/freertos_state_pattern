@@ -7,10 +7,17 @@
  * from one state to the next). context->peripheral is already wired up
  * and ready to use (see NewContext() in context.c).
  *
- * One real example is wired in: StateLoop_Run() sends a fixed 6-byte
- * message over uart every cycle, then reads back whatever is already
- * available (see UartWrite()/UartRead() in uart.h) - non-blocking, so it
- * may print fewer than 6 bytes if the reply hasn't fully arrived yet.
+ * One real example is wired in: StateLoop_Run() sends a 1-byte message
+ * to a fixed Thyone-I address every cycle (see ThyoneISendToAddress()
+ * in thyonei.h) and prints whether it was sent and confirmed - that
+ * confirmation is the fixed CMD_DATA_CNF/CMD_TXCOMPLETE_RSP pair every
+ * send gets, already waited for and checked inside
+ * ThyoneISendToAddress(), nothing to read back here. It also drains
+ * ThyoneIReceive() every cycle to print any message that arrived from
+ * another device - those arrive on their own, via ThyoneI's own
+ * background task, independently of whether/when we're sending. It
+ * also reads the Adc wired to GPIO26 (see GetAdcValue() in adc.h) every
+ * cycle and prints the raw 12-bit sample.
  */
 
 #include <stdio.h>
@@ -25,22 +32,11 @@ void StateIdle_Run(State *self, Context *context) {
 }
 
 void StateLoop_Run(State *self, Context *context) {
-    ThyoneI *u = (ThyoneI *)GetAgentByName("uart");
-    if (u == NULL) {
-        return;
-    }
 
-    uint8_t msg[512] = {0x00};
-    uint8_t addr[4] = {0x5A, 0xF0, 0x00, 0x6C};
-    uint8_t out[6] = {0x00};
-    
-    ThyoneISendToAddress(u, addr, msg, 512);
-    ThyoneIRead(u, out, 6);
-    for (int i=0;i<6;i++) printf("%d ", out[i]);
-    printf("\n");
-    ThyoneIRead(u, out, 6);
-    for (int i=0;i<6;i++) printf("%d ", out[i]);
-    printf("\n");
+    Adc *adc = (Adc *)GetAgentByName("adc");
+    if (adc != NULL) {
+        printf("adc (gpio26) = %u\n", GetAdcValue(adc));
+    }
 }
 
 void StateError_Run(State *self, Context *context) {

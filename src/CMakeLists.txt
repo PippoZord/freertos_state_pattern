@@ -12,6 +12,7 @@ add_executable(${NAME}
         togglebutton.c
         fadeled.c
         uart.c
+        adc.c
         thyonei.c
         )
 
@@ -24,7 +25,8 @@ target_include_directories(${NAME} PRIVATE
 target_link_libraries(${NAME}
     pico_stdlib
     hardware_pwm # for pwm.c (hardware/pwm.h)
-    hardware_uart # for pwm.c (hardware/pwm.h)
+    hardware_uart # for uart.c (hardware/uart.h)
+    hardware_adc # for adc.c (hardware/adc.h)
 	FreeRTOS-Kernel-Heap4 # FreeRTOS kernel and dynamic heap
     freertos_config
     )

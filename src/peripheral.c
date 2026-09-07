@@ -33,10 +33,8 @@ Peripheral *GetPeripheral() {
         istance = malloc(sizeof(Peripheral));
         for (int i = 0; i < MAX_CALLBACK; i++)
             istance->gpiosCallback[i] = (gpioCallback){ .gpio = -1, .callback = NULL };
-        // uart1 on gpio 8/9: pins 16/17 stay reserved for stdio's own
-        // debug UART (PICO_DEFAULT_UART_TX/RX_PIN, see src/CMakeLists.txt),
-        // so this uses a separate physical UART peripheral and pins.
-        istance->u = NewThyoneI("uart", 100, 1024, 1, uart1, 8, 9, 115200, 6);
+        istance->u = NewThyoneI("uart", 10, 1024, 1, uart1, 8, 9, 115200);
+        istance->adc = NewAdc("adc", 0, 512, 1, 26, 0);
     }
     return istance;
 }
